@@ -1,21 +1,23 @@
 import "dotenv/config";
+import http from "http";
 import express from "express";
 import { scoreTransaction } from "./scorer.js";
 import { publishTransactionEvent } from "./publisher.js";
 import { redisClient } from "./config/redis.js";
+import { createWebSocketServer } from "./websocket.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
-// ── Request logging middleware ────────────────────────────────────────────────
+// ── Request logging ───────────────────────────────────────────────────────────
 app.use((req, res, next) => {
     const start = Date.now();
     res.on("finish", () => {
-        const duration = Date.now() - start;
         console.log(
-            `[${new Date().toISOString()}] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`,
+            `[${new Date().toISOString()}] ${req.method} ${req.path} ` +
+                `${res.statusCode} ${Date.now() - start}ms`,
         );
     });
     next();
@@ -34,7 +36,6 @@ app.get("/health", async (req, res) => {
     } catch (err) {
         res.status(503).json({
             status: "degraded",
-            service: "chargeback-shield-scoring",
             redis: "disconnected",
             error: err.message,
         });
@@ -45,7 +46,6 @@ app.get("/health", async (req, res) => {
 app.post("/score", async (req, res) => {
     const data = req.body;
 
-    // Basic validation
     if (!data.card_bin || !data.amount) {
         return res.status(400).json({
             error: "card_bin and amount are required",
@@ -54,44 +54,40 @@ app.post("/score", async (req, res) => {
 
     try {
         const result = await scoreTransaction(data);
-
-        // Publish to Redis pub/sub for live dashboard feed
-        // Fire and forget — don't await
         publishTransactionEvent(data, result).catch(console.error);
-
         return res.json(result);
     } catch (err) {
-        console.error("[Score] Unhandled error:", err);
-        return res.status(500).json({
-            error: "Scoring failed",
-            message: err.message,
-        });
+        console.error("[Score] Error:", err);
+        return res
+            .status(500)
+            .json({ error: "Scoring failed", message: err.message });
     }
 });
 
-// ── Velocity reset (useful for demo/testing) ──────────────────────────────────
+// ── Velocity reset ────────────────────────────────────────────────────────────
 app.delete("/velocity/:cardBin/:cardLast4", async (req, res) => {
     const { cardBin, cardLast4 } = req.params;
     const pattern = `vel:card:${cardBin}${cardLast4}:*`;
-
     try {
         const keys = await redisClient.keys(pattern);
-        if (keys.length > 0) {
-            await redisClient.del(...keys);
-        }
+        if (keys.length > 0) await redisClient.del(...keys);
         res.json({ deleted: keys.length, pattern });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+// ── Create HTTP server and attach WebSocket ───────────────────────────────────
+const server = http.createServer(app);
+createWebSocketServer(server);
+
+server.listen(PORT, () => {
     console.log(`
 ╔════════════════════════════════════════════╗
 ║   Chargeback Shield — Scoring Service      ║
-║   Running on port ${PORT}                     ║
-║   Redis: ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}               ║
+║   HTTP  : http://localhost:${PORT}             ║
+║   WS    : ws://localhost:${PORT}/ws            ║
+║   Redis : ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}               ║
 ╚════════════════════════════════════════════╝
-  `);
+    `);
 });
