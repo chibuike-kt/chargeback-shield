@@ -1,37 +1,108 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+html, body, * {
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif !important;
+}
 
 @layer base {
-  html {
-    @apply antialiased;
-  }
-  body {
-    @apply bg-surface-50 text-slate-800;
-  }
+    * {
+        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    }
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-color: #f8fafc;
+        color: #1e293b;
+    }
+}
+
+@theme {
+--font-family-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui;
+
+    --color-brand-50:  #f0f4ff;
+    --color-brand-100: #e0e9ff;
+    --color-brand-200: #c7d7fe;
+    --color-brand-300: #a5b8fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+
+    --color-surface-50:  #f8fafc;
+    --color-surface-100: #f1f5f9;
+    --color-surface-200: #e2e8f0;
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors duration-150;
-  }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-white text-slate-700 text-sm font-medium rounded-lg border border-slate-200 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-colors duration-150;
-  }
-  .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
-  }
-  .input-field {
-    @apply w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition duration-150;
-  }
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  .badge-green  { @apply badge bg-emerald-50 text-emerald-700; }
-  .badge-yellow { @apply badge bg-amber-50 text-amber-700; }
-  .badge-red    { @apply badge bg-red-50 text-red-700; }
-  .badge-blue   { @apply badge bg-blue-50 text-blue-700; }
-  .badge-slate  { @apply badge bg-slate-100 text-slate-600; }
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        background-color: var(--color-brand-600);
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: background-color 0.15s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary:hover { background-color: var(--color-brand-700); }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        background-color: white;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+        transition: background-color 0.15s;
+        cursor: pointer;
+    }
+    .btn-secondary:hover { background-color: #f8fafc; }
+
+    .card {
+        background-color: white;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background-color: white;
+        color: #1e293b;
+        transition: all 0.15s;
+        outline: none;
+    }
+    .input-field:focus {
+        border-color: var(--color-brand-500);
+        box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
+    }
+    .input-field.border-red-400 { border-color: #f87171; }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.125rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .badge-green  { background-color: #ecfdf5; color: #065f46; }
+    .badge-yellow { background-color: #fffbeb; color: #92400e; }
+    .badge-red    { background-color: #fef2f2; color: #991b1b; }
+    .badge-blue   { background-color: #eff6ff; color: #1e40af; }
+    .badge-slate  { background-color: #f1f5f9; color: #475569; }
 }
