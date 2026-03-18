@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Enums\ActorType;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Merchant extends Authenticatable
 {
-  use HasUlids, Notifiable;
+  use HasUlids, HasFactory, Notifiable;
 
   protected $fillable = [
     'ulid',
@@ -33,13 +36,55 @@ class Merchant extends Authenticatable
     'password'          => 'hashed',
   ];
 
-  /**
-   * The primary key used by HasUlids is 'id' but we use
-   * an auto-increment id + separate ulid column.
-   * Override uniqueIds to return ulid only.
-   */
   public function uniqueIds(): array
   {
     return ['ulid'];
+  }
+
+  // ── Relationships ─────────────────────────────────────────────────────────
+
+  public function transactions(): HasMany
+  {
+    return $this->hasMany(Transaction::class);
+  }
+
+  public function evidenceBundles(): HasMany
+  {
+    return $this->hasMany(EvidenceBundle::class);
+  }
+
+  public function disputes(): HasMany
+  {
+    return $this->hasMany(Dispute::class);
+  }
+
+  public function webhookDeliveries(): HasMany
+  {
+    return $this->hasMany(WebhookDelivery::class);
+  }
+
+  public function trustRegistry(): HasMany
+  {
+    return $this->hasMany(MerchantTrustRegistry::class);
+  }
+
+  public function auditLogs(): HasMany
+  {
+    return $this->hasMany(AuditLog::class);
+  }
+
+  // ── Computed helpers ──────────────────────────────────────────────────────
+
+  public function totalPenaltyPoints(): int
+  {
+    return $this->trustRegistry()->sum('penalty_points');
+  }
+
+  public function trustScore(): float
+  {
+    // Score between 0 (bad) and 1 (good)
+    // Starts at 1.0, decreases with penalty points
+    $penalty = $this->totalPenaltyPoints();
+    return max(0.0, round(1.0 - ($penalty / 200), 4));
   }
 }
