@@ -19,23 +19,24 @@ function removeClient(merchantId, ws) {
     }
 }
 
-function broadcast(merchantId, data) {
-    const targets = [
-        ...(clients.get(merchantId) ?? []),
-        ...(clients.get("all") ?? []),
-    ];
-
+function broadcast(data) {
     const message = JSON.stringify(data);
+    let sent = 0;
 
-    for (const ws of targets) {
-        if (ws.readyState === WebSocket.OPEN) {
-            try {
-                ws.send(message);
-            } catch (err) {
-                console.error("[WS] Send error:", err.message);
+    for (const [merchantId, clientSet] of clients.entries()) {
+        for (const ws of clientSet) {
+            if (ws.readyState === WebSocket.OPEN) {
+                try {
+                    ws.send(message);
+                    sent++;
+                } catch (err) {
+                    console.error("[WS] Send error:", err.message);
+                }
             }
         }
     }
+
+    console.log(`[WS] Broadcasted to ${sent} client(s)`);
 }
 
 function startRedisSubscriber() {
@@ -66,8 +67,8 @@ function startRedisSubscriber() {
                 risk_color:       riskColor(event.risk_score),
             };
 
-            broadcast(String(event.merchant_id ?? 'all'), enriched);
-            broadcast('all', enriched);
+
+            broadcast(enriched);
 
         } catch (err) {
             console.error('[Redis Subscriber] Parse error:', err.message);

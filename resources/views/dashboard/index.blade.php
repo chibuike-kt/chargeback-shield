@@ -257,7 +257,7 @@
         <div class="space-y-4">
 
             {{-- Live feed --}}
-            <div class="card overflow-hidden" x-data="liveFeed()" x-init="init()">
+            <div class="card overflow-hidden" x-data="liveFeed()">
                 <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                     <div class="flex items-center gap-2">
                         <h3 class="text-sm font-semibold text-slate-800">Live Feed</h3>

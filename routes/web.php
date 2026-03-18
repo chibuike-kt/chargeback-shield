@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisputeController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\SimulationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest:merchant')->group(function () {
@@ -23,7 +24,8 @@ Route::middleware('auth:merchant')->group(function () {
     Route::get('/webhooks',            [WebhookController::class, 'index'])->name('webhooks');
     Route::post('/webhooks/{ulid}/retrigger', [WebhookController::class, 'retrigger'])->name('webhooks.retrigger');
     Route::get('/trust-registry',      fn() => view('coming-soon', ['title' => 'Trust Registry']))->name('trust-registry');
-    Route::get('/simulate',            fn() => view('coming-soon', ['title' => 'Simulation Panel']))->name('simulate');
+    Route::get('/simulate',     [SimulationController::class, 'index'])->name('simulate');
+    Route::post('/simulate/run', [SimulationController::class, 'run'])->name('simulate.run');
     Route::get('/audit-log',           fn() => view('coming-soon', ['title' => 'Audit Log']))->name('audit-log');
     Route::get('/settings',            fn() => view('coming-soon', ['title' => 'Settings']))->name('settings');
     Route::post('/logout',             [AuthController::class, 'logout'])->name('logout');
