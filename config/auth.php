@@ -42,6 +42,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Inside the 'guards' array, add:
+        'merchant' => [
+            'driver'   => 'session',
+            'provider' => 'merchants',
+        ],
+
+        // Inside the 'providers' array, add:
+        'merchants' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\Merchant::class,
+        ],
     ],
 
     /*
