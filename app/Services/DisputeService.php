@@ -18,11 +18,9 @@ class DisputeService
   public function __construct(
     private GenerateDisputeResponse $generateResponse,
     private ReasonCodeRegistry      $registry,
+    private WebhookDispatcher       $webhookDispatcher,
   ) {}
 
-  /**
-   * File a new dispute and immediately generate the response document.
-   */
   public function fileDispute(
     Merchant    $merchant,
     Transaction $transaction,
@@ -30,13 +28,10 @@ class DisputeService
   ): Dispute {
     return DB::transaction(function () use ($merchant, $transaction, $data) {
 
-      // Determine network from reason code if not specified
-      $network = $data['network']
+      $network       = $data['network']
         ?? $this->registry->getNetworkForCode($data['reason_code']);
-
       $reasonCodeDef = $this->registry->find($network, $data['reason_code']);
 
-      // Create the dispute record
       $dispute = Dispute::create([
         'transaction_id'     => $transaction->id,
         'merchant_id'        => $merchant->id,
@@ -47,17 +42,14 @@ class DisputeService
         'filed_at'           => $data['filed_at'] ?? now(),
       ]);
 
-      // Generate the response document immediately
       $responseDocument = $this->generateResponse->execute($dispute, $merchant);
 
-      // Store the response document on the dispute
       $dispute->update([
         'response_document' => $responseDocument,
         'status'            => DisputeStatus::Responded->value,
         'responded_at'      => now(),
       ]);
 
-      // Write trust registry entry
       MerchantTrustRegistry::create([
         'merchant_id'    => $merchant->id,
         'transaction_id' => $transaction->id,
@@ -67,7 +59,6 @@ class DisputeService
         'created_at'     => now(),
       ]);
 
-      // Audit log
       AuditLog::create([
         'merchant_id'   => $merchant->id,
         'actor_type'    => ActorType::Merchant->value,
@@ -83,23 +74,24 @@ class DisputeService
         'created_at'    => now(),
       ]);
 
+      // Fire webhook after transaction committed
+      $freshDispute = $dispute->fresh(['transaction']);
+      $this->webhookDispatcher->disputeFiled($freshDispute, $merchant);
+
       return $dispute->fresh(['transaction', 'transaction.evidenceBundle']);
     });
   }
 
-  /**
-   * Resolve a dispute as won or lost.
-   */
   public function resolveDispute(Dispute $dispute, string $outcome): Dispute
   {
-    $status = $outcome === 'won' ? DisputeStatus::Won : DisputeStatus::Lost;
+    $merchant = $dispute->merchant;
+    $status   = $outcome === 'won' ? DisputeStatus::Won : DisputeStatus::Lost;
 
     $dispute->update([
       'status'      => $status->value,
       'resolved_at' => now(),
     ]);
 
-    // Trust registry entry for resolution
     $eventType = $outcome === 'won'
       ? TrustEventType::DisputeWon
       : TrustEventType::DisputeLost;
@@ -123,6 +115,12 @@ class DisputeService
       'ip_address'    => request()->ip(),
       'created_at'    => now(),
     ]);
+
+    $this->webhookDispatcher->disputeResolved(
+      $dispute->fresh(['transaction']),
+      $merchant,
+      $outcome
+    );
 
     return $dispute->fresh();
   }
