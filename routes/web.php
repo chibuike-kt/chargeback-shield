@@ -15,6 +15,13 @@ Route::middleware('guest:merchant')->group(function () {
 
 // ── Authenticated routes ───────────────────────────────────────────────────────
 Route::middleware('auth:merchant')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
+    Route::get('/dashboard',       [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/transactions',    fn() => view('coming-soon', ['title' => 'Transactions']))->name('transactions');
+    Route::get('/disputes',        fn() => view('coming-soon', ['title' => 'Disputes']))->name('disputes');
+    Route::get('/webhooks',        fn() => view('coming-soon', ['title' => 'Webhooks']))->name('webhooks');
+    Route::get('/trust-registry',  fn() => view('coming-soon', ['title' => 'Trust Registry']))->name('trust-registry');
+    Route::get('/simulate',        fn() => view('coming-soon', ['title' => 'Simulation Panel']))->name('simulate');
+    Route::get('/audit-log',       fn() => view('coming-soon', ['title' => 'Audit Log']))->name('audit-log');
+    Route::get('/settings',        fn() => view('coming-soon', ['title' => 'Settings']))->name('settings');
+    Route::post('/logout',         [AuthController::class, 'logout'])->name('logout');
 });
