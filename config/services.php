@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'scoring' => [
+        'url' => env('NODE_SCORING_SERVICE_URL', 'http://localhost:3001'),
+    ],
+
 ];
