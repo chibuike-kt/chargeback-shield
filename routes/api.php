@@ -11,6 +11,9 @@ Route::get('/debug-headers', function (Illuminate\Http\Request $request) {
 });
 
 Route::prefix('v1')->middleware('merchant.api')->group(function () {
-  Route::post('transaction/intercept', [TransactionController::class, 'intercept']);
-  Route::get('transaction/{ulid}',     [TransactionController::class, 'show']);
+
+  // ── Transactions ──────────────────────────────────────────────────────────
+  Route::post('transaction/intercept',        [TransactionController::class, 'intercept']);
+  Route::get('transaction/{ulid}',            [TransactionController::class, 'show']);
+  Route::get('transaction/{ulid}/evidence',   [TransactionController::class, 'evidence']);
 });
