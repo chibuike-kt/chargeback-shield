@@ -2,7 +2,7 @@
 
 **Real-time chargeback protection for African fintechs.**
 
-Built by [Atlas Tech](https://atlastech.io) — a developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
+Built by yours truly - a developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
 
 ---
 
@@ -558,7 +558,7 @@ Each scenario produces real database records, real evidence bundles, real webhoo
 
 ## Contributing
 
-This project was built as a hackathon submission for Atlas Tech. For questions or contributions, open an issue or pull request.
+This project was built as a hackathon submission for RaenestXDev_career. For questions or contributions, open an issue or pull request.
 
 ---
 
@@ -569,4 +569,3 @@ MIT License — see `LICENSE` for details.
 ---
 
 *Chargeback Shield — Real-time chargeback protection for African fintechs.*
-*Built by Atlas Tech.*
