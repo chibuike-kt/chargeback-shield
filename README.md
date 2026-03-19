@@ -558,7 +558,7 @@ Each scenario produces real database records, real evidence bundles, real webhoo
 
 ## Contributing
 
-This project was built as a hackathon submission for RaenestXDev_career. For questions or contributions, open an issue or pull request.
+This project was built as a hackathon submission for #RaenestXDevcareer. For questions or contributions, open an issue or pull request.
 
 ---
 
