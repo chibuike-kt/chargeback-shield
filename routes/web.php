@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Landing page ──────────────────────────────────────────────────────────────
 Route::get('/', fn() => view('landing.index'))->name('home');
-Route::get('/docs', fn() => view('coming-soon', ['title' => 'Documentation']))->name('docs');
+Route::get('/docs', fn() => view('docs.index'))->name('docs');
 
 // ── Auth routes under /app ────────────────────────────────────────────────────
 Route::prefix('app')->group(function () {
