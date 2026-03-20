@@ -12,6 +12,8 @@ use App\Models\Merchant;
 use App\Models\MerchantTrustRegistry;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
+use App\Mail\ChargebackAlertMail;
+use Illuminate\Support\Facades\Mail;
 
 class DisputeService
 {
@@ -49,6 +51,9 @@ class DisputeService
         'status'            => DisputeStatus::Responded->value,
         'responded_at'      => now(),
       ]);
+
+      Mail::to($merchant->email)
+        ->queue(new ChargebackAlertMail($merchant, $dispute->fresh(['transaction', 'transaction.evidenceBundle'])));
 
       MerchantTrustRegistry::create([
         'merchant_id'    => $merchant->id,

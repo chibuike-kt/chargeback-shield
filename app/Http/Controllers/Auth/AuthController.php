@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Merchant;
+use App\Mail\WelcomeMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +41,8 @@ class AuthController extends Controller
     });
 
     Auth::guard('merchant')->login($merchant);
+
+    Mail::to($merchant->email)->queue(new WelcomeMail($merchant));
 
     session()->flash('success', 'Welcome to Chargeback Shield. Your API credentials are ready.');
 

@@ -4,6 +4,8 @@ namespace App\Jobs;
 
 use App\Enums\WebhookStatus;
 use App\Models\WebhookDelivery;
+use App\Mail\WebhookFailureMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -115,6 +117,11 @@ class DispatchWebhook implements ShouldQueue
                 'next_retry_at' => null,
             ]);
 
+            Mail::to($delivery->merchant->email)
+                ->queue(new WebhookFailureMail($delivery->merchant, $delivery));
+
+            return;
+
             Log::error('[Webhook] Permanently failed after 3 attempts', [
                 'delivery_id' => $delivery->ulid,
                 'url'         => $delivery->url,
@@ -122,6 +129,7 @@ class DispatchWebhook implements ShouldQueue
 
             return;
         }
+
 
         // Exponential backoff: attempt 1=1min, 2=5min, 3=15min
         $delayMinutes = [1 => 1, 2 => 5, 3 => 15];
