@@ -8,6 +8,7 @@ use App\Http\Controllers\SimulationController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TrustRegistryController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 // ── Landing page ──────────────────────────────────────────────────────────────
@@ -37,7 +38,15 @@ Route::prefix('app')->group(function () {
         Route::get('/simulate',                 [SimulationController::class,    'index'])->name('simulate');
         Route::post('/simulate/run',            [SimulationController::class,    'run'])->name('simulate.run');
         Route::get('/audit-log',                [AuditLogController::class,      'index'])->name('audit-log');
-        Route::get('/settings',                 fn() => view('coming-soon', ['title' => 'Settings']))->name('settings');
+        Route::get('/settings',                          [SettingsController::class, 'index'])->name('settings');
+        Route::patch('/settings/profile',               [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::patch('/settings/password',              [SettingsController::class, 'updatePassword'])->name('settings.password');
+        Route::patch('/settings/webhook',               [SettingsController::class, 'updateWebhook'])->name('settings.webhook');
+        Route::post('/settings/webhook/test',           [SettingsController::class, 'testWebhook'])->name('settings.webhook.test');
+        Route::post('/settings/api-key/regenerate',     [SettingsController::class, 'regenerateApiKey'])->name('settings.api-key.regenerate');
+        Route::post('/settings/webhook-secret/regenerate', [SettingsController::class, 'regenerateWebhookSecret'])->name('settings.webhook-secret.regenerate');
+        Route::delete('/settings',                      [SettingsController::class, 'deleteAccount'])->name('settings.delete');
+
         Route::post('/logout',                  [AuthController::class,          'logout'])->name('logout');
     });
 });
