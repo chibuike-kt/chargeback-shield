@@ -57,6 +57,46 @@ class TransactionService
   }
 
   /**
+   * Create a transaction record for a post-authorization score.
+   * The transaction is already approved by the fintech —
+   * we record it as approved and score it for evidence purposes.
+   */
+  public function createPostAuth(
+    Merchant $merchant,
+    array $requestData,
+    ScoringResult $scoringResult
+  ): Transaction {
+    return DB::transaction(function () use ($merchant, $requestData, $scoringResult) {
+
+      $transaction = Transaction::create([
+        'merchant_id'         => $merchant->id,
+        'idempotency_key'     => $requestData['idempotency_key'],
+        'card_bin'            => $requestData['card_bin'],
+        'card_last4'          => $requestData['card_last4'],
+        'card_country'        => $requestData['card_country'] ?? null,
+        'amount'              => $requestData['amount'],
+        'currency'            => strtoupper($requestData['currency']),
+        'ip_address'          => $requestData['ip_address'] ?? null,
+        'ip_country'          => $requestData['ip_country'] ?? null,
+        'ip_city'             => $requestData['ip_city'] ?? null,
+        'device_fingerprint'  => $requestData['device_fingerprint'] ?? null,
+        'session_token'       => $requestData['session_token'] ?? null,
+        'session_age_seconds' => $requestData['session_age_seconds'] ?? 0,
+        'merchant_category'   => $requestData['merchant_category'] ?? null,
+        'risk_score'          => $scoringResult->score,
+        'risk_level'          => $scoringResult->riskLevel->value,
+        // Decision reflects what our scorer would have decided
+        // but status is always approved — fintech already processed it
+        'decision'            => $scoringResult->decision->value,
+        'status'              => TransactionStatus::Approved->value,
+      ]);
+
+      $this->persistSignalLogs($transaction, $scoringResult->signals);
+
+      return $transaction;
+    });
+  }
+  /**
    * Write each scoring signal as its own log row.
    */
   private function persistSignalLogs(Transaction $transaction, array $signals): void

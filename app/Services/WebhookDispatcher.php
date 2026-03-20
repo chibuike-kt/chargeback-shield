@@ -47,6 +47,42 @@ class WebhookDispatcher
   }
 
   /**
+   * Fire a high-risk detected webhook for post-auth transactions.
+   * This tells the fintech a transaction they already approved
+   * scored dangerously high — they can freeze the card or
+   * flag the account.
+   */
+  public function highRiskDetected(Transaction $transaction, Merchant $merchant): void
+  {
+    if (!$merchant->webhook_url) {
+      return;
+    }
+
+    $payload = [
+      'event'          => 'transaction.high_risk_detected',
+      'transaction_id' => $transaction->ulid,
+      'risk_score'     => $transaction->risk_score,
+      'risk_level'     => $transaction->risk_level->value,
+      'amount'         => $transaction->amount,
+      'currency'       => $transaction->currency,
+      'card_last4'     => $transaction->card_last4,
+      'card_bin'       => $transaction->card_bin,
+      'ip_country'     => $transaction->ip_country,
+      'card_country'   => $transaction->card_country,
+      'message'        => 'This transaction scored above the high-risk threshold after authorization. Consider freezing the card or flagging the account.',
+      'timestamp'      => now()->toIso8601String(),
+    ];
+
+    $this->dispatch(
+      $merchant,
+      \App\Enums\WebhookEventType::TransactionDeclined, // reuse declined event type
+      $payload,
+      $transaction->id,
+      null
+    );
+  }
+
+  /**
    * Fire a transaction declined webhook.
    */
   public function transactionDeclined(Transaction $transaction, Merchant $merchant): void

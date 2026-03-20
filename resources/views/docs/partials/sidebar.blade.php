@@ -1,13 +1,17 @@
 <aside class="hidden lg:block w-56 shrink-0 border-r border-slate-100 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto py-6 px-3">
 
   <p class="nav-section" style="margin-top:0;">Getting Started</p>
-  <a href="/docs#quickstart" class="nav-link {{ request()->is('docs') ? 'active' : '' }}">Quickstart</a>
+  <a href="/docs#quickstart" class="nav-link">Quickstart</a>
+  <a href="/docs#pattern-post-auth" class="nav-link">Post-auth scoring</a>
+  <a href="/docs#pattern-pre-auth" class="nav-link">Pre-auth interception</a>
+  <a href="/docs#endpoint-comparison" class="nav-link">Endpoint comparison</a>
   <a href="/docs#authentication" class="nav-link">Authentication</a>
   <a href="/docs#idempotency" class="nav-link">Idempotency</a>
   <a href="/docs#environments" class="nav-link">Environments</a>
 
   <p class="nav-section">API Reference</p>
   <a href="/docs#intercept" class="nav-link">Intercept transaction</a>
+  <a href="/docs#score" class="nav-link">Score transaction</a>
   <a href="/docs#get-transaction" class="nav-link">Get transaction</a>
   <a href="/docs#get-evidence" class="nav-link">Get evidence</a>
   <a href="/docs#file-dispute" class="nav-link">File dispute</a>

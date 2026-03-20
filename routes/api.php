@@ -17,10 +17,16 @@ Route::prefix('v1')
   ->group(function () {
 
     // ── Transactions ──────────────────────────────────────────────────────
-    // Intercept gets its own tighter rate limit
+    // Pre-auth — synchronous, fintech waits for decision
     Route::post(
       'transaction/intercept',
       [TransactionController::class, 'intercept']
+    )->middleware('rate.limit:transaction_intercept');
+
+    // Post-auth — async-friendly, fintech already approved
+    Route::post(
+      'transaction/score',
+      [TransactionController::class, 'score']
     )->middleware('rate.limit:transaction_intercept');
 
     Route::get(

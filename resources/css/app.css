@@ -4,9 +4,57 @@ html, body, * {
     font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif !important;
 }
 
+body {
+    background-color: #fafafa;
+    position: relative;
+}
+
+#binary-bg {
+    position: fixed !important;
+    z-index: 0 !important;
+}
+
+nav, section, footer, header, main, .wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+.binary-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    display: flex;
+    gap: 0;
+}
+
+.binary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fall linear infinite;
+    color: #4f46e5;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    opacity: 0.18;
+    padding-top: 0;
+    width: 20px;
+    text-align: center;
+    user-select: none;
+}
+
+@keyframes fall {
+    from { transform: translateY(-120%); }
+    to   { transform: translateY(110vh); }
+}
+
 @layer base {
-    * {
-        font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    *, *::before, *::after {
+        font-family: "Courier New", Courier, monospace !important;
     }
     body {
         -webkit-font-smoothing: antialiased;

@@ -7,21 +7,12 @@
   <title>@yield('title', 'Docs') — Chargeback Shield</title>
   <meta name="description" content="Chargeback Shield API documentation. Integrate real-time chargeback protection into your African fintech in under 15 minutes.">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 
   <style>
     * {
       font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    code,
-    pre,
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
     }
 
     .docs-content h2 {
@@ -238,6 +229,69 @@
     }
   </style>
 </head>
+<script>
+  (function() {
+    function initScrollspy() {
+      var navLinks = document.querySelectorAll('.nav-link');
+      var sections = [];
+
+      navLinks.forEach(function(link) {
+        var href = link.getAttribute('href');
+        if (!href || !href.includes('#')) return;
+
+        var id = href.split('#')[1];
+        var el = document.getElementById(id);
+        if (el) sections.push({
+          id: id,
+          el: el,
+          link: link
+        });
+      });
+
+      if (sections.length === 0) return;
+
+      function onScroll() {
+        var scrollY = window.scrollY + 100;
+        var activeIndex = 0;
+
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].el.offsetTop <= scrollY) {
+            activeIndex = i;
+          }
+        }
+
+        sections.forEach(function(s, i) {
+          if (i === activeIndex) {
+            s.link.classList.add('active');
+          } else {
+            s.link.classList.remove('active');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, {
+        passive: true
+      });
+      onScroll(); // run once on load
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initScrollspy);
+    } else {
+      initScrollspy();
+    }
+  })();
+</script>
+<canvas id="binary-bg" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.06;
+"></canvas>
 
 <body class="bg-white text-slate-900 antialiased">
 

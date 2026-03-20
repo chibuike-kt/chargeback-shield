@@ -10,6 +10,7 @@ enum WebhookEventType: string
   case DisputeResponded     = 'dispute.responded';
   case DisputeWon           = 'dispute.won';
   case DisputeLost          = 'dispute.lost';
+  case HighRiskDetected     = 'transaction.high_risk_detected';
 
   public function label(): string
   {
@@ -20,6 +21,7 @@ enum WebhookEventType: string
       self::DisputeResponded    => 'Dispute Responded',
       self::DisputeWon          => 'Dispute Won',
       self::DisputeLost         => 'Dispute Lost',
+      self::HighRiskDetected    => 'High Risk Detected (Post-Auth)',
     };
   }
 }

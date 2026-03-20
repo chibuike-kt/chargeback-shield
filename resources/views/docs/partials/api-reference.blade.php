@@ -91,6 +91,76 @@
   </tbody>
 </table>
 
+<h2 id="score">Score transaction (post-auth)</h2>
+
+<div class="flex items-center gap-3 mb-4">
+  <span class="method-badge method-post">POST</span>
+  <span class="inline-code">/api/v1/transaction/score</span>
+</div>
+
+<p>
+  Post-authorization scoring endpoint. Call this after your payment flow
+  has already approved the transaction. Fire and forget — you don't need
+  to wait for the response or act on it. Evidence is locked automatically
+  for every transaction regardless of score.
+</p>
+
+<div class="callout callout-success">
+  This endpoint adds <strong>zero latency</strong> to your payment flow.
+  Call it asynchronously and let it run in the background.
+</div>
+
+<h3>Request body</h3>
+
+<p>Same parameters as <span class="inline-code">POST /transaction/intercept</span>,
+  plus one optional field:</p>
+
+<table class="param-table w-full border border-slate-200 rounded-xl overflow-hidden mb-5">
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="inline-code">external_reference</span></td>
+      <td class="text-slate-500 text-xs">string</td>
+      <td class="text-slate-400 text-xs">Optional</td>
+      <td class="text-slate-600 text-sm">Your internal transaction reference for cross-referencing.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Response</h3>
+
+<div class="code-block">
+  <pre>{
+  <span class="key">"success"</span>: <span class="value">true</span>,
+  <span class="key">"message"</span>: <span class="string">"Transaction scored and evidence locked."</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"transaction_id"</span>:      <span class="string">"01kkzedkjzwxkjmkefbehe2tdh"</span>,
+    <span class="key">"risk_score"</span>:          <span class="value">0.1240</span>,
+    <span class="key">"risk_level"</span>:          <span class="string">"low"</span>,
+    <span class="key">"evidence_bundle_id"</span>:  <span class="string">"01kkzedkk0abc123def456gh"</span>,
+    <span class="key">"high_risk_detected"</span>:  <span class="value">false</span>,
+    <span class="key">"signals"</span>:             [...],
+    <span class="key">"scored_at"</span>:           <span class="string">"2026-03-18T03:04:24+00:00"</span>,
+    <span class="key">"idempotent"</span>:          <span class="value">false</span>
+  }
+}</pre>
+</div>
+
+<div class="callout callout-warning">
+  When <span class="inline-code">high_risk_detected</span> is
+  <span class="inline-code">true</span>, a
+  <span class="inline-code">transaction.high_risk_detected</span>
+  webhook has been fired to your endpoint. Your system should
+  take appropriate action — freeze card, flag account, trigger review.
+</div>
+
 <h3>Response</h3>
 
 <div class="code-block">

@@ -77,8 +77,39 @@
   </style>
 </head>
 
-<body class="bg-[#fafafa] text-slate-900 antialiased">
 
+<body class="bg-[#fafafa] text-slate-900 antialiased">
+  <div class="binary-rain" aria-hidden="true" id="binary-rain"></div>
+
+  <script>
+    (function() {
+      var container = document.getElementById('binary-rain');
+      var cols = Math.floor(window.innerWidth / 22);
+      var durations = [8, 10, 12, 14, 16, 18, 20, 22, 24];
+      var delays = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+      for (var i = 0; i < cols; i++) {
+        var col = document.createElement('div');
+        col.className = 'binary-col';
+
+        var duration = durations[Math.floor(Math.random() * durations.length)];
+        var delay = delays[Math.floor(Math.random() * delays.length)];
+        var opacity = (Math.random() * 0.12 + 0.10).toFixed(3);
+
+        col.style.animationDuration = duration + 's';
+        col.style.animationDelay = '-' + delay + 's';
+        col.style.opacity = opacity;
+
+        var chars = '';
+        for (var j = 0; j < 40; j++) {
+          chars += (Math.random() > 0.5 ? '1' : '0') + '<br>';
+        }
+        col.innerHTML = chars;
+
+        container.appendChild(col);
+      }
+    })();
+  </script>
   @yield('content')
 
   @stack('scripts')
