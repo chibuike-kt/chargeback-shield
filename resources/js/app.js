@@ -267,5 +267,42 @@ window.liveFeed = function () {
     };
 };
 
+window.dashboardStats = function () {
+    return {
+        stats: {},
+        lastUpdated: null,
+        polling: null,
+
+        init() {
+            this.fetchStats();
+            // Poll every 30 seconds
+            this.polling = setInterval(() => this.fetchStats(), 30000);
+        },
+
+        fetchStats() {
+            fetch("/dashboard/stats", {
+                headers: {
+                    Accept: "application/json",
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                },
+            })
+                .then((r) => r.json())
+                .then((data) => {
+                    this.stats = data;
+                    this.lastUpdated = new Date().toLocaleTimeString("en-NG", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    });
+                })
+                .catch(() => {
+                    // Fail silently — page still shows server-rendered values
+                });
+        },
+    };
+};
+
 window.Alpine = Alpine;
 Alpine.start();

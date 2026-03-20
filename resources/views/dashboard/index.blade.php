@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6" x-data="dashboardStats()" x-init="init()">
 
     {{-- Welcome banner --}}
     <div class="rounded-2xl p-6 text-white relative overflow-hidden"
@@ -37,8 +37,14 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Transactions</p>
-                    <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalTransactions) }}</p>
-                    <p class="text-xs text-slate-400 mt-1">{{ $totalDeclined }} declined</p>
+                    <p class="text-3xl font-bold text-slate-800 mt-1"
+                        x-text="stats.total_transactions ?? '{{ number_format($totalTransactions) }}'">
+                        {{ number_format($totalTransactions) }}
+                    </p>
+                    <p class="text-xs text-slate-400 mt-1"
+                        x-text="(stats.total_declined ?? {{ $totalDeclined }}) + ' declined'">
+                        {{ $totalDeclined }} declined
+                    </p>
                 </div>
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#eef2ff;">
                     <svg class="w-5 h-5" fill="none" stroke="#4f46e5" viewBox="0 0 24 24">
@@ -52,10 +58,11 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Flagged (Step-Up)</p>
-                    <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalFlagged) }}</p>
-                    <p class="text-xs text-slate-400 mt-1">
-                        {{ $totalTransactions > 0 ? round(($totalFlagged / $totalTransactions) * 100, 1) : 0 }}% of total
+                    <p class="text-3xl font-bold text-slate-800 mt-1"
+                        x-text="stats.total_flagged ?? '{{ number_format($totalFlagged) }}'">
+                        {{ number_format($totalFlagged) }}
                     </p>
+                    <p class="text-xs text-slate-400 mt-1">of total transactions</p>
                 </div>
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#fffbeb;">
                     <svg class="w-5 h-5" fill="none" stroke="#d97706" viewBox="0 0 24 24">
@@ -69,8 +76,14 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Chargebacks Filed</p>
-                    <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalChargebacks) }}</p>
-                    <p class="text-xs text-slate-400 mt-1">{{ $totalDisputesOpen }} open</p>
+                    <p class="text-3xl font-bold text-slate-800 mt-1"
+                        x-text="stats.total_chargebacks ?? '{{ number_format($totalChargebacks) }}'">
+                        {{ number_format($totalChargebacks) }}
+                    </p>
+                    <p class="text-xs text-slate-400 mt-1"
+                        x-text="(stats.disputes_open ?? {{ $totalDisputesOpen }}) + ' open'">
+                        {{ $totalDisputesOpen }} open
+                    </p>
                 </div>
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#fef2f2;">
                     <svg class="w-5 h-5" fill="none" stroke="#dc2626" viewBox="0 0 24 24">
@@ -84,10 +97,11 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Disputes Won</p>
-                    <p class="text-3xl font-bold text-slate-800 mt-1">{{ number_format($totalDisputesWon) }}</p>
-                    <p class="text-xs text-slate-400 mt-1">
-                        {{ $totalChargebacks > 0 ? round(($totalDisputesWon / $totalChargebacks) * 100) : 0 }}% win rate
+                    <p class="text-3xl font-bold text-slate-800 mt-1"
+                        x-text="stats.disputes_won ?? '{{ number_format($totalDisputesWon) }}'">
+                        {{ number_format($totalDisputesWon) }}
                     </p>
+                    <p class="text-xs text-slate-400 mt-1">win rate</p>
                 </div>
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:#ecfdf5;">
                     <svg class="w-5 h-5" fill="none" stroke="#059669" viewBox="0 0 24 24">

@@ -29,6 +29,8 @@ Route::prefix('v1')
       [TransactionController::class, 'score']
     )->middleware('rate.limit:transaction_intercept');
 
+  Route::get('/transactions/export', [TransactionController::class, 'export'])->name('transactions.export');
+
     Route::get(
       'transaction/{ulid}',
       [TransactionController::class, 'show']
@@ -59,4 +61,5 @@ Route::prefix('v1')
       'dispute/{ulid}/response',
       [DisputeController::class, 'response']
     )->middleware('rate.limit:standard_api');
+
   });

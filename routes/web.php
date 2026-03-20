@@ -28,8 +28,10 @@ Route::prefix('app')->group(function () {
 
     Route::middleware('auth:merchant')->group(function () {
         Route::get('/dashboard',                [DashboardController::class,     'index'])->name('dashboard');
-        Route::get('/transactions',             [TransactionController::class,   'index'])->name('transactions');
-        Route::get('/transactions/{ulid}',      [TransactionController::class,   'show'])->name('transactions.show');
+        Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
+        Route::get('/transactions',         [TransactionController::class,     'index'])->name('transactions');
+        Route::get('/transactions/export',     [TransactionController::class,    'export'])->name('transactions.export');
+        Route::get('/transactions/{ulid}',    [TransactionController::class,       'show'])->name('transactions.show');
         Route::get('/disputes',                 [DisputeController::class,       'index'])->name('disputes');
         Route::get('/disputes/{ulid}',          [DisputeController::class,       'show'])->name('disputes.show');
         Route::get('/disputes/{ulid}/pdf',      [DisputeController::class,       'downloadPdf'])->name('disputes.pdf');

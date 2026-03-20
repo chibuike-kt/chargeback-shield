@@ -75,4 +75,87 @@ class TransactionController extends Controller
 
     return view('transactions.show', compact('transaction'));
   }
+
+  public function export(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+  {
+    $merchant = auth('merchant')->user();
+
+    $query = Transaction::with('evidenceBundle')
+      ->where('merchant_id', $merchant->id)
+      ->latest();
+
+    // Apply same filters as index
+    if ($request->filled('decision')) {
+      $query->where('decision', $request->decision);
+    }
+    if ($request->filled('risk_level')) {
+      $query->where('risk_level', $request->risk_level);
+    }
+    if ($request->filled('from')) {
+      $query->whereDate('created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+      $query->whereDate('created_at', '<=', $request->to);
+    }
+
+    $filename = 'transactions-' . now()->format('Y-m-d') . '.csv';
+
+    return response()->streamDownload(function () use ($query) {
+
+      $handle = fopen('php://output', 'w');
+
+      // CSV headers
+      fputcsv($handle, [
+        'Transaction ID',
+        'Card BIN',
+        'Card Last4',
+        'Card Country',
+        'Amount',
+        'Currency',
+        'Risk Score',
+        'Risk Level',
+        'Decision',
+        'Status',
+        'IP Address',
+        'IP Country',
+        'Device Fingerprint',
+        'Session Age (s)',
+        'Merchant Category',
+        'Evidence Bundle ID',
+        'Evidence Locked',
+        'Created At',
+      ]);
+
+      // Stream in chunks — never load all rows into memory
+      $query->chunk(500, function ($transactions) use ($handle) {
+        foreach ($transactions as $tx) {
+          fputcsv($handle, [
+            $tx->ulid,
+            $tx->card_bin,
+            $tx->card_last4,
+            $tx->card_country ?? '',
+            number_format($tx->amount / 100, 2),
+            $tx->currency,
+            $tx->risk_score,
+            $tx->risk_level->value,
+            $tx->decision->value,
+            $tx->status->value,
+            $tx->ip_address ?? '',
+            $tx->ip_country ?? '',
+            $tx->device_fingerprint ?? '',
+            $tx->session_age_seconds,
+            $tx->merchant_category ?? '',
+            $tx->evidenceBundle?->ulid ?? '',
+            $tx->evidenceBundle ? 'Yes' : 'No',
+            $tx->created_at->toIso8601String(),
+          ]);
+        }
+      });
+
+      fclose($handle);
+    }, $filename, [
+      'Content-Type'        => 'text/csv',
+      'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+    ]);
+  }
 }

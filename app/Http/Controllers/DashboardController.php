@@ -128,4 +128,73 @@ class DashboardController extends Controller
       'recentDisputes',
     ));
   }
+
+  public function stats(): \Illuminate\Http\JsonResponse
+  {
+    $merchant = auth('merchant')->user();
+
+    $totalTransactions = Transaction::where('merchant_id', $merchant->id)->count();
+
+    $totalFlagged = Transaction::where('merchant_id', $merchant->id)
+      ->where('decision', DecisionType::StepUp->value)
+      ->count();
+
+    $totalDeclined = Transaction::where('merchant_id', $merchant->id)
+      ->where('decision', DecisionType::Decline->value)
+      ->count();
+
+    $totalChargebacks = Dispute::where('merchant_id', $merchant->id)->count();
+
+    $totalDisputesWon = Dispute::where('merchant_id', $merchant->id)
+      ->where('status', DisputeStatus::Won->value)
+      ->count();
+
+    $totalDisputesOpen = Dispute::where('merchant_id', $merchant->id)
+      ->where('status', DisputeStatus::Open->value)
+      ->count();
+
+    $webhookDelivered = WebhookDelivery::where('merchant_id', $merchant->id)
+      ->where('status', WebhookStatus::Delivered->value)
+      ->count();
+
+    $webhookFailed = WebhookDelivery::where('merchant_id', $merchant->id)
+      ->where('status', WebhookStatus::Failed->value)
+      ->count();
+
+    $webhookTotal     = $webhookDelivered + $webhookFailed;
+    $webhookHealthPct = $webhookTotal > 0
+      ? round(($webhookDelivered / $webhookTotal) * 100)
+      : 100;
+
+    // Last 10 transactions for the recent feed
+    $recentTransactions = Transaction::with('evidenceBundle')
+      ->where('merchant_id', $merchant->id)
+      ->latest()
+      ->limit(10)
+      ->get()
+      ->map(fn($tx) => [
+        'ulid'       => $tx->ulid,
+        'card_last4' => $tx->card_last4,
+        'card_bin'   => $tx->card_bin,
+        'amount'     => number_format($tx->amount / 100, 2),
+        'currency'   => $tx->currency,
+        'risk_score' => $tx->risk_score,
+        'decision'   => $tx->decision->value,
+        'has_evidence' => (bool) $tx->evidenceBundle,
+        'created_at' => $tx->created_at->diffForHumans(),
+      ]);
+
+    return response()->json([
+      'total_transactions' => $totalTransactions,
+      'total_flagged'      => $totalFlagged,
+      'total_declined'     => $totalDeclined,
+      'total_chargebacks'  => $totalChargebacks,
+      'disputes_won'       => $totalDisputesWon,
+      'disputes_open'      => $totalDisputesOpen,
+      'webhook_health_pct' => $webhookHealthPct,
+      'webhook_delivered'  => $webhookDelivered,
+      'webhook_failed'     => $webhookFailed,
+      'recent_transactions' => $recentTransactions,
+    ]);
+  }
 }
