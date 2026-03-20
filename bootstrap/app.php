@@ -12,8 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        // Global middleware — applies to all requests
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // Middleware aliases
         $middleware->alias([
-            'merchant.api' => \App\Http\Middleware\ValidateMerchantApiKey::class,
+            'merchant.api'  => \App\Http\Middleware\ValidateMerchantApiKey::class,
+            'rate.limit'    => \App\Http\Middleware\RateLimitApiRequests::class,
+            'log.api'       => \App\Http\Middleware\LogApiRequests::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

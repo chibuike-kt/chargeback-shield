@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\DisputeController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
 
+// Debug route — no auth or rate limiting
 Route::get('/debug-headers', function (Illuminate\Http\Request $request) {
   return response()->json([
     'x_api_key_header' => $request->header('X-API-Key'),
@@ -11,16 +12,45 @@ Route::get('/debug-headers', function (Illuminate\Http\Request $request) {
   ]);
 });
 
-Route::prefix('v1')->middleware('merchant.api')->group(function () {
+Route::prefix('v1')
+  ->middleware(['merchant.api', 'log.api'])
+  ->group(function () {
 
-  // ── Transactions ──────────────────────────────────────────────────────────
-  Route::post('transaction/intercept',      [TransactionController::class, 'intercept']);
-  Route::get('transaction/{ulid}',          [TransactionController::class, 'show']);
-  Route::get('transaction/{ulid}/evidence', [TransactionController::class, 'evidence']);
+    // ── Transactions ──────────────────────────────────────────────────────
+    // Intercept gets its own tighter rate limit
+    Route::post(
+      'transaction/intercept',
+      [TransactionController::class, 'intercept']
+    )->middleware('rate.limit:transaction_intercept');
 
-  // ── Disputes ──────────────────────────────────────────────────────────────
-  Route::post('dispute',              [DisputeController::class, 'file']);
-  Route::get('disputes',              [DisputeController::class, 'index']);
-  Route::get('dispute/{ulid}',        [DisputeController::class, 'show']);
-  Route::get('dispute/{ulid}/response', [DisputeController::class, 'response']);
-});
+    Route::get(
+      'transaction/{ulid}',
+      [TransactionController::class, 'show']
+    )->middleware('rate.limit:standard_api');
+
+    Route::get(
+      'transaction/{ulid}/evidence',
+      [TransactionController::class, 'evidence']
+    )->middleware('rate.limit:standard_api');
+
+    // ── Disputes ──────────────────────────────────────────────────────────
+    Route::post(
+      'dispute',
+      [DisputeController::class, 'file']
+    )->middleware('rate.limit:standard_api');
+
+    Route::get(
+      'disputes',
+      [DisputeController::class, 'index']
+    )->middleware('rate.limit:standard_api');
+
+    Route::get(
+      'dispute/{ulid}',
+      [DisputeController::class, 'show']
+    )->middleware('rate.limit:standard_api');
+
+    Route::get(
+      'dispute/{ulid}/response',
+      [DisputeController::class, 'response']
+    )->middleware('rate.limit:standard_api');
+  });
