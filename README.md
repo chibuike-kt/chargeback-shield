@@ -6,7 +6,7 @@ Built by yours truly - a developer-focused fintech middleware platform that inte
 
 ---
 
-## What It Does
+## What It Does?
 
 Every time a card transaction is processed through Chargeback Shield:
 
