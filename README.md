@@ -2,7 +2,7 @@
 
 **Real-time chargeback protection for African fintechs.**
 
-Built by yours truly - a developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
+Built by Kingsley - a developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
 
 ---
 
