@@ -2,11 +2,11 @@
 
 **Real-time chargeback protection for African fintechs.**
 
-Built by yours truly - a developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
+A developer-focused fintech middleware platform that intercepts, scores, and protects African card and payment transactions against chargebacks and fraud in real time.
 
 ---
 
-## What It Does
+## What It Does?
 
 Every time a card transaction is processed through Chargeback Shield:
 
