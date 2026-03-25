@@ -289,7 +289,7 @@
         this.running = scenarioId;
         this.result = null;
 
-        fetch('/simulate/run', {
+        fetch('/app/simulate/run', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

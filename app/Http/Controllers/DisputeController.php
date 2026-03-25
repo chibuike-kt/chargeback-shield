@@ -31,7 +31,7 @@ class DisputeController extends Controller
             ->where('merchant_id', $merchant->id)
             ->firstOrFail();
 
-        return view('disputes.show', compact('dispute'));
+        return view('disputes.show', compact('dispute')); // singular
     }
 
     public function downloadPdf(string $ulid): Response

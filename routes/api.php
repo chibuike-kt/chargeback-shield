@@ -29,8 +29,6 @@ Route::prefix('v1')
       [TransactionController::class, 'score']
     )->middleware('rate.limit:transaction_intercept');
 
-  Route::get('/transactions/export', [TransactionController::class, 'export'])->name('transactions.export');
-
     Route::get(
       'transaction/{ulid}',
       [TransactionController::class, 'show']

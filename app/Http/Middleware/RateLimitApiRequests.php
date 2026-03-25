@@ -33,29 +33,21 @@ class RateLimitApiRequests
         $cutoff   = $now - $windowMs;
 
         try {
-            $pipeline = Redis::pipeline();
-            $pipeline->zadd($identifier, $now, "{$now}");
-            $pipeline->zremrangebyscore($identifier, '-inf', $cutoff);
-            $pipeline->zcard($identifier);
-            $pipeline->expire($identifier, $limits['window'] + 10);
-            $results = $pipeline->exec();
+            // Use individual commands instead of pipeline — Predis compatible
+            Redis::zadd($identifier, $now, (string) $now);
+            Redis::zremrangebyscore($identifier, '-inf', $cutoff);
+            $count = (int) Redis::zcard($identifier);
+            Redis::expire($identifier, $limits['window'] + 10);
 
-            $count     = $results[2];
             $remaining = max(0, $allowed - $count);
             $resetAt   = $now + $windowMs;
         } catch (\Exception $e) {
-            // If Redis is down, fail open — don't block legitimate traffic
+            // Fail open — don't block legitimate traffic if Redis is down
             return $next($request);
         }
 
-        // Add rate limit headers to every response
-        $response = $next($request);
-        $response->headers->set('X-RateLimit-Limit',     $allowed);
-        $response->headers->set('X-RateLimit-Remaining', $remaining);
-        $response->headers->set('X-RateLimit-Reset',     (int) ($resetAt / 1000));
-
         if ($count > $allowed) {
-            $retryAfter = ceil($limits['window'] - (($now - $cutoff) / 1000));
+            $retryAfter = ceil($limits['window']);
 
             return ApiResponse::error(
                 'Too many requests. Slow down and try again shortly.',
@@ -66,12 +58,17 @@ class RateLimitApiRequests
                     'window'      => "{$limits['window']} seconds",
                 ]
             )->withHeaders([
-                'Retry-After'             => max(1, $retryAfter),
-                'X-RateLimit-Limit'       => $allowed,
-                'X-RateLimit-Remaining'   => 0,
-                'X-RateLimit-Reset'       => (int) ($resetAt / 1000),
+                'Retry-After'           => max(1, $retryAfter),
+                'X-RateLimit-Limit'     => $allowed,
+                'X-RateLimit-Remaining' => 0,
+                'X-RateLimit-Reset'     => (int) ($resetAt / 1000),
             ]);
         }
+
+        $response = $next($request);
+        $response->headers->set('X-RateLimit-Limit',     $allowed);
+        $response->headers->set('X-RateLimit-Remaining', $remaining);
+        $response->headers->set('X-RateLimit-Reset',     (int) ($resetAt / 1000));
 
         return $response;
     }

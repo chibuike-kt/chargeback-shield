@@ -37,12 +37,13 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Transactions</p>
+
                     <p class="text-3xl font-bold text-slate-800 mt-1"
-                        x-text="stats.total_transactions ?? '{{ number_format($totalTransactions) }}'">
+                        x-text="stats.total_transactions !== undefined ? stats.total_transactions : '{{ number_format($totalTransactions) }}'">
                         {{ number_format($totalTransactions) }}
                     </p>
                     <p class="text-xs text-slate-400 mt-1"
-                        x-text="(stats.total_declined ?? {{ $totalDeclined }}) + ' declined'">
+                        x-text="(stats.total_declined !== undefined ? stats.total_declined : {{ $totalDeclined }}) + ' declined'">
                         {{ $totalDeclined }} declined
                     </p>
                 </div>

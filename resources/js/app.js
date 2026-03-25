@@ -131,7 +131,7 @@ window.simulationPanel = function () {
             if (this.running) return;
             this.running = scenarioId;
             this.result = null;
-            fetch("/simulate/run", {
+            fetch("/app/simulate/run", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -275,12 +275,15 @@ window.dashboardStats = function () {
 
         init() {
             this.fetchStats();
-            // Poll every 30 seconds
-            this.polling = setInterval(() => this.fetchStats(), 30000);
+            var self = this;
+            this.polling = setInterval(function () {
+                self.fetchStats();
+            }, 30000);
         },
 
         fetchStats() {
-            fetch("/dashboard/stats", {
+            var self = this;
+            fetch("/app/dashboard/stats", {
                 headers: {
                     Accept: "application/json",
                     "X-CSRF-TOKEN": document.querySelector(
@@ -288,17 +291,19 @@ window.dashboardStats = function () {
                     ).content,
                 },
             })
-                .then((r) => r.json())
-                .then((data) => {
-                    this.stats = data;
-                    this.lastUpdated = new Date().toLocaleTimeString("en-NG", {
+                .then(function (r) {
+                    return r.json();
+                })
+                .then(function (data) {
+                    self.stats = data;
+                    self.lastUpdated = new Date().toLocaleTimeString("en-NG", {
                         hour: "2-digit",
                         minute: "2-digit",
                         second: "2-digit",
                     });
                 })
-                .catch(() => {
-                    // Fail silently — page still shows server-rendered values
+                .catch(function (err) {
+                    console.warn("Stats fetch failed:", err);
                 });
         },
     };
